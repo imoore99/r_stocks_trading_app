@@ -19,18 +19,20 @@ from airtable import api_data_connection, earnings_data
 from robinhood import robinhood_build
 #trade functions
 from trade import swing
+#login-table setup
+from login import robinhood_table_id, ticker_table_id, cash_bal_table_id, base_id, api_key, email, pw
 
 
 ###Variables
-robinhood_table_id = 'tblszXCrJDQGZkjYJ'
-ticker_table_id = 'tbldjgydnntqFViXP'
-cash_bal_table_id = 'tblWwR2pGnEd6bN17'
+#robinhood_table_id = 'tblszXCrJDQGZkjYJ'
+#ticker_table_id = 'tbldjgydnntqFViXP'
+#cash_bal_table_id = 'tblWwR2pGnEd6bN17'
 
-base_id = 'appZU0zyoMOqAAk5H'
-api_key = 'keyPvSX6It0au3zIA'
+#base_id = 'appZU0zyoMOqAAk5H'
+#api_key = 'keyPvSX6It0au3zIA'
 
-email = 'ian.t.moore@hotmail.com'
-pw = 'dog zebra !99'
+#email = 'ian.t.moore@hotmail.com'
+#pw = 'dog zebra !99'
 
 quantity = 3
 
