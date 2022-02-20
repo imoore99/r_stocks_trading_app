@@ -29,8 +29,6 @@ quantity = 3
 
 loop = 30
 
-
-
 #API Connections to Airtable DB
 cash_bal_data_api = api_data_connection(api_key, base_id, cash_bal_table_id, 0)
 #ticker_data_api = api_data_connection(api_key, base_id, ticker_table_id, 0)
