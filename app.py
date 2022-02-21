@@ -16,11 +16,12 @@ warnings.filterwarnings("ignore")
 #airtable API/Data import
 from airtable import api_data_connection, earnings_data
 #robinood API/Data/Function import
-from robinhood import robinhood_build
+from robinhood import robinhood_build, crypto_robinhood_build
 #trade functions
-from trade import swing
+from trade import swing, crypto_swing
 #login-table setup
-from login import robinhood_table_id, ticker_table_id, cash_bal_table_id, base_id, api_key, email, pw
+from login import (robinhood_table_id, ticker_table_id, cash_bal_table_id, 
+                    crypto_table_id, base_id, api_key, email, pw)
 
 
 ###Variables
@@ -33,10 +34,12 @@ loop = 30
 cash_bal_data_api = api_data_connection(api_key, base_id, cash_bal_table_id, 0)
 #ticker_data_api = api_data_connection(api_key, base_id, ticker_table_id, 0)
 robinhood_data_api = api_data_connection(api_key, base_id, robinhood_table_id, 0)
+crypto_ticker_api = api_data_connection(api_key, base_id, crypto_table_id, 0)
 #Data Connections to Airtable DB
 #cash_bal_data = api_data_connection(api_key, base_id, cash_bal_table_id, 1)
 ticker_data = api_data_connection(api_key, base_id, ticker_table_id, 1)
 robinhood_data = api_data_connection(api_key, base_id, robinhood_table_id, 1)
+crypto_ticker_data = api_data_connection(api_key, base_id, crypto_table_id, 1)
 
 
 #tkinter setup
@@ -130,13 +133,20 @@ def trade_loop():
         unsettled_funds = robinhood_account_data[2]
         non_holdings = robinhood_account_data[3]
 
+        #clean/extract robinhood crypto data
+        crypto_table = crypto_robinhood_build(crypto_ticker_data).reset_index()
+        crypto_swing_data = crypto_table[crypto_table['strategy']=='Swing']
+        #crypto_ST_data = crypto_table[crypto_table['strategy']=='ST']
+
         print("Airtable cash bal load "+ datetime.now().strftime("%H:%M:%S"))
         #Load current cash bal into airtable
         record = {'Cash Bal': str(buying_power), 'Unsettled Funds':unsettled_funds}
         cash_bal_data_api.create(base_id, cash_bal_table_id, record)
         print("robinhood trade analysis and airtable load "+ datetime.now().strftime("%H:%M:%S"))
+        
         #performs swing trade analysis
         swing(stock_holdings, non_holdings, quantity, base_id, robinhood_data_api, robinhood_table_id)
+        crypto_swing(crypto_swing_data, base_id, robinhood_data_api, robinhood_table_id)
 
         #tkinter buying power and unsettled funds label configuration
         bp_label.config(text="Buying Power: ${:.2f}".format(float(buying_power)))
