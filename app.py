@@ -123,11 +123,14 @@ def trade_loop():
         for i in ticker_data:
             ticker = i['fields']['Name']
             airtable_ticker_list.append(ticker)
-
+        ticker_tbl = pd.DataFrame(
+                {'Ticker':airtable_ticker_list,
+                'position': 'Swing'}
+                )
         print("robinhood data load "+ datetime.now().strftime("%H:%M:%S"))
 
         #clean/extract robinhood data
-        robinhood_account_data = robinhood_build(airtable_ticker_list)
+        robinhood_account_data = robinhood_build(ticker_tbl)
         stock_holdings = robinhood_account_data[0]
         buying_power = robinhood_account_data[1]
         unsettled_funds = robinhood_account_data[2]

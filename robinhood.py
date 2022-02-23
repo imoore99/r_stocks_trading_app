@@ -32,8 +32,8 @@ def robinhood_build(ticker_tbl):
                           'Current_price_list': current_price_list}
                           )
 
-    stock_holdings_f = stock_holdings_df.Ticker.isin(ticker_tbl)
-    stock_holdings = stock_holdings_df[stock_holdings_f]
+    stock_holdings_f = ticker_tbl.set_index('Ticker').join(stock_holdings_df.set_index('Ticker')).reset_index()
+    stock_holdings = stock_holdings_f.dropna()
     print(stock_holdings)
     #cash balance/buying power
     cash_bal = r.profiles.load_account_profile('cash_balances')
@@ -44,10 +44,8 @@ def robinhood_build(ticker_tbl):
 
     #r.logout()
     #isolate stocks not currently being held
-    ticker_tbl = pd.DataFrame(
-                {'Ticker':ticker_tbl}
-                )
-    non_holdings = ticker_tbl[~ticker_tbl.Ticker.isin(stock_holdings['Ticker'])]
+    
+    non_holdings = stock_holdings_f[pd.isnull(stock_holdings_f['Quantity'])]
     
     return stock_holdings, buying_power, unsettled_funds, non_holdings
 print("Robinhood stock data loaded at "+ datetime.now().strftime("%H:%M:%S"))

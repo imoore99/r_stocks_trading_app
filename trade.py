@@ -11,10 +11,10 @@ now = datetime.now().strftime("%H:%M:%S")
 def swing(stock_holdings, non_holdings, quantity, base_id, robinhood_data_api, robinhood_table_id):
     for i in range(len(stock_holdings)):
         ticker = stock_holdings.iloc[i,0]
-        avg_price = stock_holdings.iloc[i, 1]
-        sell_price = avg_price*1.0035
-        current_price = stock_holdings.iloc[i, 3]
-        quantity_holdings = stock_holdings.iloc[i, 2]
+        avg_price = stock_holdings.iloc[i, 2]
+        sell_price = float(avg_price)*1.0035
+        current_price = stock_holdings.iloc[i, 4]
+        quantity_holdings = stock_holdings.iloc[i, 3]
         record = {'Name':str(ticker), 'Cost Per Share':avg_price, 'Sold Price Per Share':current_price, 'Quantity Sold':quantity}
         if current_price > avg_price and quantity_holdings > quantity:
             ###sell command in robinhood
