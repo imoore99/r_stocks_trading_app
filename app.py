@@ -18,7 +18,7 @@ from airtable import api_data_connection, earnings_data
 #robinood API/Data/Function import
 from robinhood import robinhood_build, crypto_robinhood_build
 #trade functions
-from trade import swing, crypto_swing
+from trade import swing, no_hold_buy, crypto_swing, swing_long
 #login-table setup
 from login import (robinhood_table_id, ticker_table_id, cash_bal_table_id, 
                     crypto_table_id, base_id, api_key, email, pw)
@@ -26,7 +26,7 @@ from login import (robinhood_table_id, ticker_table_id, cash_bal_table_id,
 
 ###Variables
 
-quantity = 3
+quantity = 6
 
 loop = 30
 
@@ -39,7 +39,7 @@ crypto_ticker_api = api_data_connection(api_key, base_id, crypto_table_id, 0)
 #cash_bal_data = api_data_connection(api_key, base_id, cash_bal_table_id, 1)
 ticker_data = api_data_connection(api_key, base_id, ticker_table_id, 1)
 robinhood_data = api_data_connection(api_key, base_id, robinhood_table_id, 1)
-crypto_ticker_data = api_data_connection(api_key, base_id, crypto_table_id, 1)
+#crypto_ticker_data = api_data_connection(api_key, base_id, crypto_table_id, 1)
 
 
 #tkinter setup
@@ -120,13 +120,17 @@ def trade_loop():
         print("Airtable ticker load "+ datetime.now().strftime("%H:%M:%S"))
         #Clean airtable data for stored/input ticker list
         airtable_ticker_list = []
+        airtable_position_list = []
         for i in ticker_data:
             ticker = i['fields']['Name']
             airtable_ticker_list.append(ticker)
+            
+            position = i['fields']['Trade_Type']
+            airtable_position_list.append(position)
         ticker_tbl = pd.DataFrame(
-                {'Ticker':airtable_ticker_list,
-                'position': 'Swing'}
-                )
+                        {'Ticker':airtable_ticker_list,
+                        'position': airtable_position_list}
+                        )
         print("robinhood data load "+ datetime.now().strftime("%H:%M:%S"))
 
         #clean/extract robinhood data
@@ -137,8 +141,8 @@ def trade_loop():
         non_holdings = robinhood_account_data[3]
 
         #clean/extract robinhood crypto data
-        crypto_table = crypto_robinhood_build(crypto_ticker_data).reset_index()
-        crypto_swing_data = crypto_table[crypto_table['strategy']=='Swing']
+        #crypto_table = crypto_robinhood_build(crypto_ticker_data).reset_index()
+        #crypto_swing_data = crypto_table[crypto_table['strategy']=='Swing']
         #crypto_ST_data = crypto_table[crypto_table['strategy']=='ST']
 
         print("Airtable cash bal load "+ datetime.now().strftime("%H:%M:%S"))
@@ -148,8 +152,10 @@ def trade_loop():
         print("robinhood trade analysis and airtable load "+ datetime.now().strftime("%H:%M:%S"))
         
         #performs swing trade analysis
-        swing(stock_holdings, non_holdings, quantity, base_id, robinhood_data_api, robinhood_table_id)
-        crypto_swing(crypto_swing_data, base_id, robinhood_data_api, robinhood_table_id)
+        swing(stock_holdings, quantity, base_id, robinhood_data_api, robinhood_table_id, buying_power)
+        no_hold_buy(non_holdings, quantity)
+        swing_long(stock_holdings, quantity, base_id, robinhood_data_api, robinhood_table_id, buying_power)
+        #crypto_swing(crypto_swing_data, base_id, robinhood_data_api, robinhood_table_id)
 
         #tkinter buying power and unsettled funds label configuration
         bp_label.config(text="Buying Power: ${:.2f}".format(float(buying_power)))
@@ -170,7 +176,7 @@ def trade_loop():
 
         print("Loop ends now "+ datetime.now().strftime("%H:%M:%S"))
     # After 30 sec call the robinhood_function again
-    win.after(10000, trade_loop)
+    win.after(30000, trade_loop)
 ###THIS SHOULD BE THE END OF THE LOOP - breaks for 30 seconds - then restarts
 
 #Tkinter Setup

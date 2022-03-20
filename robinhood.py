@@ -28,7 +28,7 @@ def robinhood_build(ticker_tbl):
     stock_holdings_df = pd.DataFrame(
                           {'Ticker': holding_ticker_list,
                           'Average_buy_price': average_buy_list,
-                          'Quantity': quantity_list,
+                          'Quantity_holdings': quantity_list,
                           'Current_price_list': current_price_list}
                           )
 
@@ -45,7 +45,7 @@ def robinhood_build(ticker_tbl):
     #r.logout()
     #isolate stocks not currently being held
     
-    non_holdings = stock_holdings_f[pd.isnull(stock_holdings_f['Quantity'])]
+    non_holdings = stock_holdings_f[pd.isnull(stock_holdings_f['Quantity_holdings'])]
     
     return stock_holdings, buying_power, unsettled_funds, non_holdings
 print("Robinhood stock data loaded at "+ datetime.now().strftime("%H:%M:%S"))
@@ -109,5 +109,35 @@ def crypto_robinhood_build(crypto_ticker_data):
     return crypto_table
 print("Robinhood crypto data loaded at "+ datetime.now().strftime("%H:%M:%S"))
 
+### Functions that pull out stock historicals
+def stock_formula(stock, hist_int, hist_span):
+    #---> Create df for historical data
+    df = pd.DataFrame()
+    #---> load historical data
+    h = r.stocks.get_stock_historicals(str(stock), interval=str(hist_int), span=str(hist_span))
+    #--->List for loop
+    Ticker = []
+    Date = []
+    Price = []
+    #--->Loop through to pull out historical data for analysis
+    for i in h:
+        t = stock
+        d = pd.to_datetime(i['begins_at'], format='%Y-%m-%d').replace(tzinfo=None) 
+        n = i['close_price']
+        Ticker.append(t)
+        Date.append(d)
+        Price.append(n)
 
+    df['Ticker'] = Ticker
+    df['Date'] = Date
+    df['Price'] = Price
+    
+    df['mean_20'] = df['Price'].rolling(20).mean()
+    df['mean_5'] = df['Price'].rolling(5).mean()
+    
+    df =df[-1:]
+    mean_20 = float(df['mean_20'])
+    mean_5 = float(df['mean_5'])
+    
+    return mean_20, mean_5
 
