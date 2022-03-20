@@ -38,12 +38,13 @@ def swing(stock_holdings, quantity, base_id, robinhood_data_api, robinhood_table
 
 
 #non-holdings formula
-def no_hold_buy(non_holdings, quantity):
+def no_hold_buy(non_holdings, quantity, buying_power):
     print('Non-Holdings: ')
     print(non_holdings)
     for t in non_holdings['Ticker']:
-        r.orders.order_buy_fractional_by_quantity(t, int(quantity)+.10)
-        print('Buy', t, int(quantity)+.10)
+        if buying_power >= int(quantity)*10:
+            r.orders.order_buy_fractional_by_quantity(t, int(quantity)+.10)
+            print('Buy', t, int(quantity)+.10)
         time.sleep(.25)
 
 #Swing-Long formula
@@ -64,20 +65,26 @@ def swing_long(stock_holdings, quantity, base_id, robinhood_data_api, robinhood_
         
         record = {'Name':str(ticker), 'Cost Per Share':avg_price, 'Sold Price Per Share': current_price, 'Quantity Sold':quantity}
 
-        if mean_5 <= mean_20 and mean_5 > avg_price and quantity_holdings >= quantity:
+        if mean_5 <= mean_20 and current_price > avg_price and quantity_holdings >= quantity:
             ###sell command in robinhood
             r.orders.order_sell_market(ticker, quantity)
             print('Sell', ticker, quantity_holdings, mean_20, mean_5) 
             #airtable API current
             robinhood_data_api.create(base_id, robinhood_table_id, record)
         
-        elif mean_5 >= mean_20 and quantity_holdings < quantity and buying_power >= (quantity*10):
+        #elif mean_5 >= mean_20 and quantity_holdings < quantity and buying_power >= (quantity*10):
+        elif quantity_holdings < quantity and buying_power >= int(quantity)*10:
             buy_quantity = quantity-quantity_holdings
             print('Buy', ticker, buy_quantity, mean_20, mean_5) 
         #Made need to establish a 1s break in code for each loop
         time.sleep(.25)
 
 print("Stock trades loaded at "+ datetime.now().strftime("%H:%M:%S"))
+
+
+
+
+
 #Crypto swing formula
 def crypto_swing(swing_table, base_id, robinhood_data_api, robinhood_table_id):
     for i in range(len(swing_table)):
@@ -105,4 +112,4 @@ def crypto_swing(swing_table, base_id, robinhood_data_api, robinhood_table_id):
             print('Buy', ticker, avg_price, sell_price, current_price, quantity_to_sell)
         #Made need to establish a 1s break in code for each loop
         time.sleep(.25)
-print("Crypto trades loaded at "+ datetime.now().strftime("%H:%M:%S"))
+#print("Crypto trades loaded at "+ datetime.now().strftime("%H:%M:%S"))

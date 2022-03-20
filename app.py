@@ -16,9 +16,9 @@ warnings.filterwarnings("ignore")
 #airtable API/Data import
 from airtable import api_data_connection, earnings_data
 #robinood API/Data/Function import
-from robinhood import robinhood_build, crypto_robinhood_build
+from robinhood import robinhood_build
 #trade functions
-from trade import swing, no_hold_buy, crypto_swing, swing_long
+from trade import swing, no_hold_buy, swing_long
 #login-table setup
 from login import (robinhood_table_id, ticker_table_id, cash_bal_table_id, 
                     crypto_table_id, base_id, api_key, email, pw)
